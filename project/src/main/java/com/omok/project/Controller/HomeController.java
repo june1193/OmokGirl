@@ -1,33 +1,75 @@
 package com.omok.project.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.omok.project.domain.userDTO;
+import com.omok.project.service.UserService;
 
 @Controller
 public class HomeController {
+
+	@Autowired
+	private UserService userService;
+
+	// 매칭 메인
+	@RequestMapping("/home")
+	public String main(Model model) {
+		return "Home";
+	}
+
+	// 방목록
+	@RequestMapping("/R_list")
+	public String R_list(Model model) {
+		return "room_list";
+	}
+
+	// 게임방
+	@RequestMapping("/G_room")
+	public String G_room(Model model) {
+		return "game_room";
+	}
+
+	// 회원가입 페이지
+	@GetMapping("/register")
+	public String showRegistrationForm() {
+		return "register"; // 회원가입 폼을 보여주는 뷰 이름
+	}
+
+	// 회원정보 db에 저장
+	@PostMapping("/register")
+	public String registerUser(@ModelAttribute userDTO userDTO, Model model) {
+		userService.registerUser(userDTO);
+		return "login"; // 로그인 페이지로 이동
+	}
+
 	
-	//수정테스트123
-	
-	   // 매칭 메인
-	   @RequestMapping("/home")
-	   public String main(Model model) {
-			/*
-			 * // 인기랭킹 List<Club> r_clubs = nr.selectTopClubs(5);
-			 * model.addAttribute("r_data", r_clubs); // 클럽 게시판 int pageSize = 8; // 페이지당
-			 * 보여줄 데이터 수 설정 int totRecords = nr.getTotalCount(); PageHandler handler = new
-			 * PageHandler(currentPage, totRecords, pageSize); List<Club> list =
-			 * nr.selectAll(currentPage, pageSize); model.addAttribute("data", list);
-			 * model.addAttribute("handler", handler); // 매치 뷰 List<MatchViewDTO> list2 =
-			 * ms.mainMatchViewSV(); model.addAttribute("main", list2);
-			 * 
-			 * HttpSession session = request.getSession(); UserLoginDTO user =
-			 * (UserLoginDTO) session.getAttribute("loggedInUser");
-			 * 
-			 * model.addAttribute("user", user);
-			 */
-	      
-	      return "Home";
-	   }
+	//로그인 페이지
+	@GetMapping("/login")
+	public String showLoginForm() {
+		return "login"; // 로그인 페이지 JSP
+	}
+
+	//로그인 계정 맞는지 체크
+	@PostMapping("/login")
+	public String loginUser(@ModelAttribute("userDto") userDTO userDto, Model model) {
+		try {
+			boolean checked = userService.checkUser(userDto.getId(), userDto.getPassword());
+			if (checked) {
+				return "redirect:/R_list"; // 로그인 성공 시 방목록으로
+			} else {
+				model.addAttribute("error", "아이디나 비밀번호가 틀렸습니다.");
+				return "login"; // 로그인 실패 시 로그인 페이지로 돌아가기
+			}
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+			return "login"; // 로그인 페이지로 돌아가기
+		}
+	}
 
 }

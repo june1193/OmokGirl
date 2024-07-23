@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.omok.mapper">
+
+	<insert id="insertUser" parameterType="com.omok.project.domain.userDTO">
+		INSERT INTO users (id, password, email, nickname)
+		VALUES
+		(#{id}, #{password}, #{email}, #{nickname});
+	</insert>
+
+	<select id="getPasswordById" resultType="String">
+		SELECT password FROM users WHERE id = #{id}
+	</select>
+
+</mapper>
