@@ -71,5 +71,11 @@ public class HomeController {
 			return "login"; // 로그인 페이지로 돌아가기
 		}
 	}
+	
+	//테스트
+	@GetMapping("/chat")
+	public String test() {
+		return "b-chat"; 
+	}
 
 }
