@@ -77,5 +77,7 @@ public class HomeController {
 	public String test() {
 		return "b-chat"; 
 	}
+	
+
 
 }

@@ -37,9 +37,9 @@ var wsocket;
 	        });
 		connect();
 		
-		//소켓 연결 ws://localhost:8080/chat
+		//소켓 연결
 		function connect(){
-			wsocket = new WebSocket("ws://localhost:8080/project/chat");
+			wsocket = new WebSocket("ws://localhost:8080/project/chat-ws");
 			wsocket.onopen = onOpen;
 			wsocket.onmessage = onMessage;
 			wsocket.onclose = onClose;
