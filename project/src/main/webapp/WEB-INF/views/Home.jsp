@@ -16,8 +16,8 @@
 </head>
 <body>
 메인
-<a href="javascript:popupOpen('b-chat');" title="배드민턴방">
-아무맒말말
+<!-- <a href="javascript:popupOpen('b-chat');" title="배드민턴방">
+아무맒말말 -->
 </a>
 </body>
 </html>
