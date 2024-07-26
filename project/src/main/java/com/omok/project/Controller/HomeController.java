@@ -72,11 +72,6 @@ public class HomeController {
 		}
 	}
 	
-	//Å×½ºÆ®
-	@GetMapping("/chat")
-	public String test() {
-		return "b-chat"; 
-	}
 	
 
 
