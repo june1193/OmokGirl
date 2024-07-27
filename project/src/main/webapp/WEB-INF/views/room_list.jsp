@@ -261,55 +261,132 @@ var wsocket;
 				        });
 
 	});
+	
 </script>
 <style>
-.chatt-box {
-	border: 2px solid #000; /* 테두리 추가 */
-	background-color: #D2B48C; /* 진한 베이지색 배경 */
-	padding: 10px; /* 내부 여백 */
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	background-color: #f0f0f0;
+}
+
+#wrap {
+	display: flex;
+	width: 860px;
+	height: 530px;
+	background-color: #ffffff;
+	border: 1px solid #ccc;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.g-rooms-container, .chat-main {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.g-rooms-container {
+	flex: 2;
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid #ccc;
+}
+
+.g-rooms {
+	flex: 2;
+	padding: 10px;
+	overflow-y: auto;
+}
+
+
+
+
+.chat-main {
+	flex: 1;
+	padding: 10px;
 }
 
 .chatt-area {
 	border: 2px solid #000; /* 테두리 추가 */
 	background-color: #F5DEB3; /* 밝은 베이지색 배경 */
 	padding: 10px; /* 내부 여백 */
-	height: 300px; /* 높이 설정 */
 	overflow-y: scroll; /* 내용이 넘칠 경우 스크롤 추가 */
+	height: 100px;
 }
+
+
+
+.ccu {
+	width: 150px;
+	padding: 10px;
+	border-left: 1px solid #ccc;
+}
+
+.ccu-header {
+	margin-top: 0;
+}
+
+.ccu-list {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ccu-list-item {
+	padding: 5px 0;
+	border-bottom: 1px solid #ccc;
+}
+
 </style>
 </head>
 <body>
 	<div id="wrap">
-		<div id="chatting">
-			<div class="window active" style="max-width: 400px">
-				<div class="window-body has-space">
-					<div class="field-row-stacked" style="width: 100%">
-						<div class="header">
+			<div class="g-rooms-container">
+				<div class="g-rooms">
+					<h2 class="g-header">방 목록</h2>
+					<ul>
+						<li>방 1</li>
+						<li>방 2</li>
+						<li>방 3</li>
+					</ul>
+				</div>
+				<div class="chat-main">
+					<div class="window">
+						<div class="field-row-stacked" style="width: 100%">
 							<!-- 접속자 수 -->
 							<div class="count">
 								<span> (0)</span>
 							</div>
-						</div>
-
-						<div class="chatt-box">
-							<div class="chatt-area"></div>
-						</div>
-						<!-- 닉 입력창 (입력하면 사라짐) -->
-						<div class="open">
-							<div class="field-row-stacked"
-								style="width: 233px; margin: 0 auto;">
-								<label for="text27">닉네임</label>
-								<div class="input-nickname">
-									<input id="text27" type="text" />
-									<button type="button" id="entrance">입장</button>
+							<div class="chatt-box">
+								<div class="chatt-area"></div>
+							</div>
+							<!-- 닉 입력창 (입력하면 사라짐) -->
+							<div class="open">
+								<div class="field-row-stacked"
+									style="width: 233px; margin: 0 auto;">
+									<label for="text27">닉네임</label>
+									<div class="input-nickname">
+										<input id="text27" type="text" />
+										<button type="button" id="entrance">입장</button>
+									</div>
 								</div>
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>
-		</div>
+			<!-- 접속자 목록 -->
+			<div class="ccu">
+				<h2 class="ccu-header">접속자</h2>
+				<ul class="ccu-list">
+					<li class="ccu-list-item">사용자1</li>
+					<li class="ccu-list-item">사용자2</li>
+					<li class="ccu-list-item">사용자3</li>
+				</ul>
+			</div>
 	</div>
 </body>
 </html>

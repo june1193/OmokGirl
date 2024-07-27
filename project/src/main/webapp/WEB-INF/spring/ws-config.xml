@@ -14,10 +14,10 @@
 
   <websocket:handlers>
       <websocket:mapping handler="chatHandler" path="/chat-lobby" />
-<!--       <websocket:mapping handler="chatHandler-R" path="/chat-room" /> -->
+	  <websocket:mapping handler="chatHandler-tem" path="/chat-tem" /> 
   </websocket:handlers>
 
   <bean id="chatHandler" class="com.omok.project.Controller.ChatWebSocketHandler" />
-<!--   <bean id="chatHandler-R" class="com.omok.project.Controller.ChatWebSocketHandler-R" /> -->
+	<bean id="chatHandler-tem" class="com.omok.project.Controller.ChatWebSocketHandler_tem" />
   
 </beans>
