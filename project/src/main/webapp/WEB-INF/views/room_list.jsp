@@ -18,7 +18,7 @@ var wsocket;
 
 
   
-	$(document).ready(function(){
+	$(document).ready(function(){ // 페이지가 로드되었을 때 실행
 		
 
 	      
@@ -30,28 +30,31 @@ var wsocket;
 	        	type : "get",
 	        	url : "/project/getCount",
 	        	success :function(data){
-	        		writeCount(data);
+	        		writeCount(data); // 현재 접속자 수 표시
 	        	}
 	        });
-		connect();
+		connect(); // 웹소켓 연결
 		
-		//소켓 연결
+		//소켓 연결 함수
 		function connect(){
 			wsocket = new WebSocket("ws://localhost:8080/project/chat-lobby");
-			wsocket.onopen = onOpen;
-			wsocket.onmessage = onMessage;
-			wsocket.onclose = onClose;
+			wsocket.onopen = onOpen; // 연결이 열렸을 때 호출
+			wsocket.onmessage = onMessage; // 메시지를 받을 때 호출
+			wsocket.onclose = onClose; // 연결이 닫혔을 때 호출
 		}
 		
-		var disConnect = false;
+		var disConnect = false; // 연결 종료 상태 변수
+		
+		// 소켓 연결 종료 함수
 		 function disconnect() {
-				disConnect = true;
+				disConnect = true;  // 연결 종료 상태로 설정
 		        let today = new Date(); 
-		    	let hours = today.getHours(); // 시
-				let minutes = today.getMinutes();  // 분
-				let seconds = today.getSeconds(); //초
+		    	let hours = today.getHours(); // 현재 시
+				let minutes = today.getMinutes();  // 현재 분
+				let seconds = today.getSeconds(); // 현재 초
 		    	let msg = "<div class='notice'>*** "+hours+":"+minutes+":"+seconds+" ༺"+nickname+"༻님이 퇴장하였습니다. ***</div>";
-		    	wsocket.send(msg);
+		    	wsocket.send(msg); // 퇴장 메시지 전송
+		    	
 				//퇴장시 카운트 감소
 		    	$.ajax({
 		    		type : "get",
@@ -59,16 +62,16 @@ var wsocket;
 		    		success:function(data){
 		    			wsocket.send("감소count:"+data); //상대방한테 보내는 메세지
 		    			writeCount(data); //내 화면 카운트 감소
-		    			wsocket.close(); //onclose()호출
+		    			wsocket.close(); // 웹소켓 연결 종료 (onclose() 호출)
 		    		}
 		    		
 		    	});
 		    	        
 		    }
 		 
-			
+		 // 브라우저 창 닫힐 때 이벤트 처리
 		 window.addEventListener('beforeunload', (event) => {
-			  // 표준에 따라 기본 동작 방지
+			  // 기본 동작 방지
 			  event.preventDefault();
 			  console.log(nickname);
 			  if(!disConnect && nickname != undefined){
@@ -81,7 +84,7 @@ var wsocket;
 							let minutes = today.getMinutes();  // 분
 							let seconds = today.getSeconds(); //초
 					    	let msg = "<div class='notice'>*** "+hours+":"+minutes+":"+seconds+" ༺"+nickname+"༻님이 퇴장하였습니다. ***</div>";
-					    	wsocket.send(msg);
+					    	wsocket.send(msg); // 퇴장 메시지 전송
 			    			wsocket.send("감소count:"+data); //상대방한테 보내는 메세지
 			    			writeCount(data); //내 화면 카운트 감소
 			    		}
@@ -102,26 +105,26 @@ var wsocket;
 		    	
 		    }
 		     
-		    //상대방한테 메세지 받으면 실행됨
+		    // 메시지를 받을 때 호출되는 함수
 		    function onMessage(evt) {
-		        var data = evt.data;
-		        var message = data.split(":");
-		        var sender = message[0];
-		        var content = message[1];
-		        let msg = content.trim().charAt(0);
+		        var data = evt.data; // 받은 데이터
+		        var message = data.split(":"); // 메시지를 ':'로 분리
+		        var sender = message[0]; // 메시지 보낸 사람
+		        var content = message[1]; // 메시지 내용
+		        let msg = content.trim().charAt(0); // 메시지 첫 글자
 		        if (msg === '/') { //귓속말 
 					if(content.match("/"+nickname)){
 						var temp = content.replace(("/"+nickname), "[귓속말] "+sender+" : ");
 						whisper(temp);
 					}
 		        }else if (data.match("notice")) {
-		        	noticeMessage(data);
+		        	noticeMessage(data); // 공지 메시지인 경우
 		        }else if(sender === 'count'){
-		        	writeCount(content);
+		        	writeCount(content); // 접속자 수 증가 메시지인 경우
 		        }else if(sender === '감소count'){
-		        	writeCount(content);
+		        	writeCount(content); // 접속자 수 감소 메시지인 경우
 		        }else{
-		        	appendRecvMessage(data);
+		        	appendRecvMessage(data); // 일반 메시지인 경우
 		        	
 		        }
 		        
@@ -131,51 +134,56 @@ var wsocket;
 		        
 		    }
 		    
+		    // 소켓 연결이 닫혔을 때 호출되는 함수
 		    function onClose(evt) {
-		    	window.close();   
+		    	window.close();   // 창 닫기
 		      }
 		    
+		    // 접속자 수 표시 함수
 		    function writeCount(data){
 		    	$(".count").empty();
     			$(".count").append("<span> ("+data+") </span>");
 		    }
 		    
+		    // 귓속말 표시 함수
 		    function whisper(msg){
 		    	$(".chatt-area").append("<div class='whisper'>"+ msg+"</div>");
-		    	scrollTop();
+		    	scrollTop(); // 스크롤바 아래로 이동
 		    }
 		    
 		     
 
 		    
-		   
+		    // 메시지 전송 함수
 		    function send() {  
-		        var msg = $("#message").val();       
+		        var msg = $("#message").val(); // 메시지 입력 값    
 		        
 		        
-		        wsocket.send(nickname+" : " + msg);        
-		        $("#message").val("");
+		        wsocket.send(nickname+" : " + msg); // 서버로 메시지 전송    
+		        $("#message").val(""); // 입력 창 비우기
 		        
 		        //채팅창에 자신이 쓴 메시지 추가 
 		        appendSendMessage(msg);
 		        
 		    }
 		    
+	    	 // 공지 메시지 표시 함수
 		    function noticeMessage(msg){
 		
 		    	$(".chatt-area").append(msg);
-		    	scrollTop();	   
+		    	scrollTop(); //스크롤바 아래로 이동
 
 		    }
 
 		    
-		    //받는 메시지 채팅창에 추가
+		    //받은 메시지 채팅창에 추가
 		    function appendRecvMessage(msg) {
 		        $(".chatt-area").append( "<div class=''>" + msg+"</div>");        
-		        scrollTop();
+		        scrollTop(); // 스크롤바 아래로 이동
 		    }
 
 		    
+		    // 스크롤바 아래로 이동 함수
 		    function  scrollTop(){
 		    	  var chatAreaHeight = $(".chatt-box").height();         
 		          var maxScroll = $(".chatt-area").height() - chatAreaHeight;  
@@ -185,55 +193,57 @@ var wsocket;
 		    //보내는 메시지 채팅창에 추가
 		    function appendSendMessage(msg) {  
 		        $(".chatt-area").append( "<div class='send' > " + msg+  "</div>"); 
-		        scrollTop();
+		        scrollTop(); // 스크롤바 아래로 이동
 		        
 		    }
 		    
+		    // 메시지 입력 창에서 Enter 키를 눌렀을 때 메시지 전송
 		    $(document).on("keypress","#message",function(event){
 				   var keycode =  event.keyCode  ;		            
 					  
-			       if(keycode == '13'){	
-			    	   event.preventDefault();
-			                send(); 
+			       if(keycode == '13'){	 // Enter 키 코드
+			    	   event.preventDefault(); // 기본 동작 방지
+			                send();  // 메시지 전송
 			       }  		 
 			            event.stopPropagation();  // 상위로 이벤트 전파 막음
 			        });
 		   
 		    
 
-		       
+		                // 전송 버튼 클릭 시 메시지 전송
 		    			$(document).on("click","#sendBtn",function(){
 		    				send();
 		    			});
 		    			
+		    			// 닉네임 입력 창에서 Enter 키를 눌렀을 때 입장 버튼 클릭
 		    			$(document).on("keypress","#text27",function(event){
 		 				   var keycode =  event.keyCode  ;		            
 		 					  
-		 			       if(keycode == '13'){	
-		 			    	   event.preventDefault();
-		 			    	  $('#entrance').click();
+		 			       if(keycode == '13'){	 // Enter 키 코드
+		 			    	   event.preventDefault(); // 기본 동작 방지
+		 			    	  $('#entrance').click(); // 입장 버튼 클릭
 		 			       }  		 
 		 			            event.stopPropagation();  // 상위로 이벤트 전파 막음
 		 			        });
 		    			//입장 버튼 눌렀을때
 				        $('#entrance').click(function() { 
-				        	nickname = $("#text27").val();
+				        	nickname = $("#text27").val(); // 닉네임 입력 값
 				        	if(nickname == ''){
-				        		alert("닉네임을 입력해 주세요");
+				        		alert("닉네임을 입력해 주세요"); // 닉네임 미입력 시 경고
 				        	}else{
 				        		
 
 						    	//접속자 수 증가
 								$.ajax({
 						    		type : "get",
-						    		url : "/project/checkNickname/"+nickname,
+						    		url : "/project/checkNickname/"+nickname, //닉 중복확인 요청
 						    		success:function(data){
 						    			if(data > 0){
 						    				let msg = "<div class='notice'>*** "+hours+":"+minutes+":"+seconds+" ⟣"+nickname+"⟢님이 입장하였습니다. ***</div>";
-											wsocket.send(msg);
-									    	noticeMessage(msg);
-									    	wsocket.send("count:"+data);
-							    			writeCount(data);
+											wsocket.send(msg); // 입장 메시지 전송
+									    	noticeMessage(msg); // 입장 메시지 표시
+									    	wsocket.send("count:"+data);  // 접속자 수 증가 메시지 전송
+							    			writeCount(data); // 접속자 수 표시
 							    			
 							    			$(".open").remove(); /*닉 입력하면 닉 입력양식 제거  */
 								        	let str = `<div class="nicknamae-area">
@@ -244,7 +254,7 @@ var wsocket;
 												<button id="sendBtn">전송</button>
 											</div>`; /* 채팅입력 인터페이스를 생성후 이를 HTML에 추가 */
 											$(".field-row-stacked").append(str);
-											$("#message").focus();
+											$("#message").focus(); //메세지 입력
 											window.resizeTo( $('#wrap').width() + (window.outerWidth - window.innerWidth), $('#wrap').height() + (window.outerHeight - window.innerHeight));
 							    			
 						    			}else{
