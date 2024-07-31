@@ -538,8 +538,7 @@ if(!is_debugmode() && board[y][x] == STONE_NONE){
     // 금수 판정 받았을 경우
     else if(result == false){
     board[y][x] = STONE_NONE;
-    alert('금수 입니다. 놓을 수 없습니다.');
-
+    appendSendStone("6목은 금수 입니다.");
     }
     // 승리 판정 받았을 경우
     else if(result == true){
@@ -582,7 +581,7 @@ function placeServerStone(command, x, y) {
         } else if (result === false) {
             // 금수
             board[y][x] = STONE_NONE; // 착수한 돌을 제거합니다
-            alert('금수입니다. 놓을 수 없습니다.');
+            appendSendStone("6목은 금수 입니다.");
         } else if (result === true) {
             // 승리
             board_stack.push([x, y, stoneColor]); // 돌 순서 스택에 푸시
@@ -698,6 +697,14 @@ else if(_stone==STONE_WHITE)
 
 context.fill();
 
+// 하이라이트 추가 (오리지널)
+var radius = stone_size / 2;
+context.beginPath();
+context.arc(x, y, radius * 0.7, Math.PI * 0.7, Math.PI * 1.3); // 하이라이트의 영역
+context.lineWidth = 2; // 하이라이트 두께
+context.strokeStyle = 'rgb(203, 203, 203)'; // 하이라이트 색상
+context.stroke();
+
 };
 // 판 출력 인터페이스
 function print_board(_board){
@@ -744,635 +751,67 @@ document.querySelector("textarea[name=gamelog]").value += message + '\r\n';
 
 
 
+
+
+
+
+
 /* ********** 게임 로직 관련 ********** */
 // 착수,금수 처리 루틴
-function check_pointer(_x, _y, _stone, _board){
-var x, y;
+function check_pointer(x, y, stoneColor, board) {
+    // 좌표가 보드의 범위 내에 있는지 확인
+    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+        return false;
+    }
 
-// 돌 카운트 변수들
-var count;       // 단순 카운팅
-var count_black; // 흑돌 카운팅
-var count_none;  // 빈칸 카운팅
-var count_white; // 백돌 카운팅
+    // 현재 돌의 색상으로 체크할 방향 설정
+    const directions = [
+        { dx: 1, dy: 0 },   // 가로
+        { dx: 0, dy: 1 },   // 세로
+        { dx: 1, dy: 1 },   // 대각선 하향
+        { dx: 1, dy: -1 }   // 대각선 상향
+    ];
 
-// 3x3, 4x4 판단용 boolean 변수들
-var hori_33 = false;  // 가로 33
-var vert_33 = false;  // 세로 33
-var ltrb_33 = false;  // 대각선↘ 33
-var rtlb_33 = false;  // 대각선↙ 33
-var hori_44 = false;  // 가로 44
-var vert_44 = false;  // 세로 44
-var ltrb_44 = false;  // 대각선↘ 44
-var rtlb_44 = false;  // 대각선↙ 44
+    // 4 방향으로 5목/6목 체크
+    for (const dir of directions) {
+        const { dx, dy } = dir;
 
-if(_stone == STONE_BLACK){ // 금수는 흑에게만 적용
-    /*      3*3 판별 로직      */
-    // 가로 방향 카운팅
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
+        // 현재 돌을 기준으로 좌우로 5목, 6목 체크
+        let count = 1;
 
-    // 가로 우 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(x+i > BOARD_SIZE-1)
-        break;
-    if(_board[_y][x+i] != STONE_WHITE){
-        if(_board[_y][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[_y][x+i] == STONE_NONE){
-        count_none++;
+        // 왼쪽 방향으로 돌 수 세기
+        for (let step = 1; step < 6; step++) {
+            const nx = x - step * dx;
+            const ny = y - step * dy;
+            if (nx < 0 || nx >= BOARD_SIZE || ny < 0 || ny >= BOARD_SIZE || board[ny][nx] !== stoneColor) {
+                break; //이동한 좌표 (nx, ny)가 보드의 경계를 벗어나거나, 돌의 색상이 다른 경우에는 루프를 종료
+            }
+            count++;
         }
-    }else if(_board[_y][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && x+i+1 < BOARD_SIZE)
-        if(_board[_y][x+i+1] == STONE_WHITE)
-        count_white++;
-    }
-    // 가로 우 방향 열린 3 여부 체킹
-    var tmp_hori_33 = true;
-    if(count_none <= count_white)
-    tmp_hori_33 = false;
 
-    // 가로 좌 방향
-    for(var i=1; i<4; i++){
-     // 게임판 탈출 방지 루틴
-    if(x-i < 0)
-        break;
-    if(_board[_y][x-i] != STONE_WHITE){
-        if(_board[_y][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[_y][x-i] == STONE_NONE){
-        count_none++;
+        // 오른쪽 방향으로 돌 수 세기
+        for (let step = 1; step < 6; step++) {
+            const nx = x + step * dx;
+            const ny = y + step * dy;
+            if (nx < 0 || nx >= BOARD_SIZE || ny < 0 || ny >= BOARD_SIZE || board[ny][nx] !== stoneColor) {
+                break;
+            }
+            count++;
         }
-    }else if(_board[_y][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && x-i-1 > 0)
-        if(_board[_y][x-i-1] == STONE_WHITE)
-        count_white++;
-    }
-    // 둘다 열린 3이면서 흑돌이 3개인 경우
-    if(count_none-count_white > 3 && tmp_hori_33 && count_black == 3)
-    hori_33 = true;  // 가로 방향 3x3 판정
 
-    // 세로 방향 카운팅
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    // 세로 하 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y+i > BOARD_SIZE-1)
-        break;
-    if(_board[y+i][_x] != STONE_WHITE){
-        if(_board[y+i][_x] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][_x] == STONE_NONE){
-        count_none++;
+        // 6목 이상이면 금수
+        if (count >= 6) {
+            return false;
         }
-    }else if(_board[y+i][_x] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y+i+1 < BOARD_SIZE)
-        if(_board[y+i+1][_x] == STONE_WHITE)
-        count_white++;
-    }
-    // 세로 하 방향 열린 3 여부 체킹
-    var tmp_vert_33 = true;
-    if(count_none <= count_white)
-    tmp_vert_33 = false;
 
-    // 세로 상 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y-i < 0)
-        break;
-    if(_board[y-i][_x] != STONE_WHITE){
-        if(_board[y-i][_x] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][_x] == STONE_NONE){
-        count_none++;
+        // 5목이면 승리
+        if (count === 5) {
+            return true;
         }
-    }else if(_board[y-i][_x] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y-i-1 < 0)
-        if(_board[y-i-1][_x] == STONE_WHITE)
-        count_white++;
-    }
-    // 둘다 열린 3면서 흑돌이 3개인 경우
-    if(count_none-count_white > 3 && tmp_vert_33 && count_black == 3)
-    vert_33 = true;  // 세로 방향 33 판정
-
-    // 대각선↘
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    // 대각선 우 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y+i > BOARD_SIZE-1 || x+i > BOARD_SIZE-1)
-        break;
-    if(_board[y+i][x+i] != STONE_WHITE){
-        if(_board[y+i][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][x+i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y+i][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y+i+1 < BOARD_SIZE && x+i+1 < BOARD_SIZE)
-        if(_board[y+i+1][x+i+1] == STONE_WHITE)
-        count_white++;
-    }
-    // 대각선 우 방향 열린 3 여부 체킹
-    var tmp_ltrb_33 = true;
-    if(count_none <= count_white)
-    tmp_ltrb_33 = false;
-
-    // 대각선 좌 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y-i < 0 || x-i < 0)
-        break;
-    if(_board[y-i][x-i] != STONE_WHITE){
-        if(_board[y-i][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][x-i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y-i][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y-i-1 > 0 && x-i-1 > 0)
-        if(_board[y-i-1][x-i-1] == STONE_WHITE)
-        count_white++;
-    }
-    // 둘다 열린 3 이면서 흑돌이 3개인 경우
-    if(count_none-count_white > 3 && tmp_ltrb_33 && count_black == 3)
-    ltrb_33 = true;  // 대각선↘ 방향 33 판정
-
-    // 대각선↙
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    // 대각선 좌 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y+i > BOARD_SIZE-1 || x-i < 0)
-        break;
-    if(_board[y+i][x-i] != STONE_WHITE){
-        if(_board[y+i][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][x-i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y+i][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y+i+1 < BOARD_SIZE && x-i-1 > 0)
-        if(_board[y+i+1][x-i-1] == STONE_WHITE)
-        count_white++;
-    }
-    // 대각선 좌 방향 열린 3 여부 체킹
-    var tmp_rtlb_33 = true;
-    if(count_none <= count_white)
-    tmp_rtlb_33 = false;
-
-    // 대각선 우 방향
-    for(var i=1; i<4; i++){
-    // 게임판 탈출 방지 루틴
-    if(y-i < 0 || x+i > BOARD_SIZE-1)
-        break;
-    if(_board[y-i][x+i] != STONE_WHITE){
-        if(_board[y-i][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][x+i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y-i][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    // 기본적으로 3칸까지만 카운팅 하고, 4번째 칸이 백돌일때만 추가 카운팅
-    if(i==3 && y-i-1 > 0 && x+i+1 < BOARD_SIZE)
-        if(_board[y-i-1][x+i+1] == STONE_WHITE)
-        count_white++;
-    }
-    // 둘다 열린 3 이면서 흑돌이 3개인 경우
-    if(count_none-count_white > 3 && tmp_rtlb_33 && count_black == 3)
-    rtlb_33 = true;  // 대각선↙ 방향 33 판정
-
-
-    /*      4*4 판별 로직      */
-    // 가로
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    for(var i=1; i<5; i++){
-    if(x+i > BOARD_SIZE-1)
-        break;
-    if(_board[_y][x+i] != STONE_WHITE){
-        if(_board[_y][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[_y][x+i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[_y][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
     }
 
-    for(var i=1; i<5; i++){
-    if(x-i < 0)
-        break;
-    if(_board[_y][x-i] != STONE_WHITE){
-        if(_board[_y][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[_y][x-i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[_y][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    // 둘다 열린 4 이면서 흑돌이 4개인 경우
-    if(count_none >= count_white && count_black == 4)
-    hori_44 = true;  // 가로 방향 44 판정
-
-    // 세로
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    for(var i=1; i<5; i++){
-    if(y+i > BOARD_SIZE-1)
-        break;
-    if(_board[y+i][_x] != STONE_WHITE){
-        if(_board[y+i][_x] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][_x] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y+i][_x] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    for(var i=1; i<5; i++){
-    if(y-i < 0)
-        break;
-    if(_board[y-i][_x] != STONE_WHITE){
-        if(_board[y-i][_x] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][_x] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y-i][_x] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-     // 둘다 열린 4 이면서 흑돌이 4개인 경우
-    if(count_none >= count_white && count_black == 4)
-    vert_44 = true; // 세로 방향 44 판정
-
-    // 대각선↘
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    for(var i=1; i<5; i++){
-    if(y+i > BOARD_SIZE-1 || x+i > BOARD_SIZE-1)
-        break;
-    if(_board[y+i][x+i] != STONE_WHITE){
-        if(_board[y+i][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][x+i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y+i][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    for(var i=1; i<5; i++){
-    if(y-i < 0 || x-i < 0)
-        break;
-    if(_board[y-i][x-i] != STONE_WHITE){
-        if(_board[y-i][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][x-i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y-i][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    // 둘다 열린 4 이면서 흑돌이 4개인 경우
-    if(count_none >= count_white && count_black == 4)
-    ltrb_44 = true;  // 대각선↘ 방향 44 판정
-
-    // 대각선↙ new
-    x = _x;
-    y = _y;
-    count_black = 1;
-    count_none = 0;
-    count_white = 0;
-
-    for(var i=1; i<5; i++){
-    if(y+i > BOARD_SIZE-1 || x-i < 0)
-        break;
-    if(_board[y+i][x-i] != STONE_WHITE){
-        if(_board[y+i][x-i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y+i][x-i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y+i][x-i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    for(var i=1; i<5; i++){
-    if(y-i < 0 || x+i > BOARD_SIZE-1)
-        break;
-    if(_board[y-i][x+i] != STONE_WHITE){
-        if(_board[y-i][x+i] == STONE_BLACK){
-        count_black++;
-        }else if(_board[y-i][x+i] == STONE_NONE){
-        count_none++;
-        }
-    }else if(_board[y-i][x+i] == STONE_WHITE){
-        count_white++;
-        break;
-    }
-    }
-
-    // 둘다 열린 4 이면서 흑돌이 4개인 경우
-    if(count_none >= count_white && count_black == 4)
-    rtlb_44 = true;  // 대각선↙ 방향 44 판정
-
-    // 3*3 판정 결과중 가로,세로,대각선 2개방향 중 2개이상이 해당될 경우(3*3 인 상황)
-    if(hori_33 + vert_33 + ltrb_33 + rtlb_33 >= 2){ // 33 판정 결과 먼저 확인
-    return false;  // 금수 처리
-    }
-     // 4*4 판정 결과중 가로,세로,대각선 2개방향 중 2개이상이 해당될 경우(4*4 인 상황)
-    else if(hori_44 + vert_44 + ltrb_44 + rtlb_44 >= 2){
-    return false;  // 금수 처리
-    }
-
-
-    /*      4*4 예외 판별 로직      */
-    /* 위의 4*4 판별 로직에서 걸러낼수 없는 동일 축 내에서 2개의 44가 발생하는 경우 */
-    /* ●●빈●●빈●● 이거랑 ●빈●●●빈● 패턴 찾아내기 */
-    // 패턴 문자열 변수들
-    var hori_44 = '';
-    var vert_44 = '';
-    var ltrb_44 = '';
-    var rtlb_44 = '';
-
-    // 가로
-    // 모든 가로축에 돌들에 대해 수집
-    for(var i=0; i<BOARD_SIZE; i++){
-    hori_44 = hori_44.concat(_board[_y][i]);
-    }
-
-    // 세로
-    // 모든 세로축에 돌들에 대해 수집
-    for(var i=0; i<BOARD_SIZE; i++){
-    vert_44 = vert_44.concat(_board[i][_x]);
-    }
-
-    // 대각선 ↘
-    // 모든 대각선 ↘에 돌들에 대해 수집
-    x = _x;
-    y = _y;
-
-    // 대각선 끝점 찾기
-    while(y > 0 && x > 0){
-    y--;
-    x--;
-    }
-
-    do{
-    ltrb_44 = ltrb_44.concat(_board[y][x]);
-    }while(++y < BOARD_SIZE && ++x < BOARD_SIZE)
-
-    // 대각선 ↙
-    // 모든 대각선 ↙의 돌들에 대해 수집
-    x = _x;
-    y = _y;
-
-    // 대각선 끝점 찾기
-    while(y > 0 && x < BOARD_SIZE){
-    y--;
-    x++;
-    }
-
-    do{
-    rtlb_44 = rtlb_44.concat(_board[y][x]);
-    }while(++y < BOARD_SIZE && --x > 0)
-
-    // 찾아낼 착수 패턴 문자열 변수들
-    pt1 = (''+STONE_BLACK)
-    + (''+STONE_BLACK)
-    + (''+STONE_NONE)
-    + (''+STONE_BLACK)
-    + (''+STONE_BLACK)
-    + (''+STONE_NONE)
-    + (''+STONE_BLACK)
-    + (''+STONE_BLACK);
-
-    pt2 = (''+STONE_BLACK)
-    + (''+STONE_NONE)
-    + (''+STONE_BLACK)
-    + (''+STONE_BLACK)
-    + (''+STONE_BLACK)
-    + (''+STONE_NONE)
-    + (''+STONE_BLACK);
-
-    // 가로,세로,대각선2방향의 돌 정보중 패턴이 하나라도 포함될 경우, 44 예외 판정
-    if(hori_44.includes(pt1) || hori_44.includes(pt2)) // 가로
-    return false;  // 금수 처리
-    else if(vert_44.includes(pt1) || vert_44.includes(pt2)) // 세로
-    return false;
-    else if(ltrb_44.includes(pt1) || ltrb_44.includes(pt2)) // 대각선↘
-    return false;
-    else if(rtlb_44.includes(pt1) || rtlb_44.includes(pt2)) // 대각선↙
-    return false;
-
-    /* 5,6목 이상 판별 로직 */
-    // 가로
-    x = _x;
-    y = _y;
-    count = 0;
-    // 카운팅 시작점 찾기
-    while(x-- > 0 && _board[_y][x] == STONE_BLACK);
-    // 카운팅
-    while(++x < BOARD_SIZE && _board[_y][x] == STONE_BLACK)
-    count++;
-
-    // 6목 이상일 경우
-    if(count > 5)
-    return false;  // 금수 처리
-    // 정확히 5목 일 경우
-    else if(count == 5)
-    return true;  // 승리 처리
-
-    // 세로
-    x = _x;
-    y = _y;
-    count = 0;
-    // 카운팅 시작점 찾기
-    while(y-- > 0 && _board[y][_x] == STONE_BLACK);
-    // 카운팅
-    while(++y < BOARD_SIZE && _board[y][_x] == STONE_BLACK)
-    count++;
-
-    if(count > 5)
-    return false;
-    else if(count == 5)
-    return true;
-
-    // 대각선 ↘
-    x = _x;
-    y = _y;
-    count = 0;
-    // 카운팅 시작점 찾기
-    while(x-- > 0 && y-- > 0 && _board[y][x] == STONE_BLACK);
-    // 카운팅
-    while(++x < BOARD_SIZE && ++y < BOARD_SIZE && _board[y][x] == STONE_BLACK)
-    count++;
-
-    if(count > 5)
-    return false;
-    else if(count == 5)
-    return true;
-
-    // 대각선 ↙
-    x = _x;
-    y = _y;
-    count = 0;
-    // 카운팅 시작점 찾기
-    while(x++ < BOARD_SIZE && y-- > 0 && _board[y][x] == STONE_BLACK);
-    // 카운팅
-    while(--x > 0 && ++y < BOARD_SIZE && _board[y][x] == STONE_BLACK)
-    count++;
-
-    if(count > 5)
-    return false;
-    else if(count == 5)
-    return true;
-}else if(_stone == STONE_WHITE){
-    /*      백 승리 판별 로직      */
-    /* 백(후수)은 모든 금수 처리에 대해 예외이기 때문에 승리 조건만 검사 */
-    // 백 승리 검사용 문자열 변수들
-    var hori_win = '';
-    var vert_win = '';
-    var ltrb_win = '';
-    var rtlb_win = '';
-
-    // 가로
-    // 가로 방향에 대해 모든 돌 정보 수집
-    for(var i=0; i<BOARD_SIZE; i++){
-    hori_win = hori_win.concat(_board[_y][i]);
-    }
-
-    // 세로
-    for(var i=0; i<BOARD_SIZE; i++){
-    vert_win = vert_win.concat(_board[i][_x]);
-    }
-
-    // 대각선 ↘
-    x = _x;
-    y = _y;
-
-    // 대각선 끝점 선정
-    while(y > 0 && x > 0){
-    y--;
-    x--;
-    }
-    do{
-    ltrb_win = ltrb_win.concat(_board[y][x]);
-    }while(++y < BOARD_SIZE && ++x < BOARD_SIZE)
-
-    // 대각선 ↙
-    x = _x;
-    y = _y;
-
-    // 대각선 끝점 선정
-    while(y > 0 && x < BOARD_SIZE){
-    y--;
-    x++;
-    }
-    do{
-    rtlb_win = rtlb_win.concat(_board[y][x]);
-    }while(++y < BOARD_SIZE && --x > 0)
-
-    // 찾아낼 착수 패턴
-    pt = (''+STONE_WHITE)
-   + (''+STONE_WHITE)
-   + (''+STONE_WHITE)
-   + (''+STONE_WHITE)
-   + (''+STONE_WHITE);
-
-    // 가로,세로,대각선2 방향 중 패턴과 하나라도 일치할 경우, 백 승리 판정
-    if(hori_win.includes(pt))
-    return true;
-    else if(vert_win.includes(pt))
-    return true;
-    else if(ltrb_win.includes(pt))
-    return true;
-    else if(rtlb_win.includes(pt))
-    return true;
-}
-// 모든 금수 로직에 걸리지 않았을 경우
-return null;  // 정상 착수 처리
+    // 5목도, 6목도 아니면 정상 착수
+    return null;
 }
 </script>
 <!-- 간단한 선행 처리 자바스크립트 -->
