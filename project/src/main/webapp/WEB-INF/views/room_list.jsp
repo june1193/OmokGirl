@@ -305,11 +305,6 @@ body {
 	border-right: 1px solid #ccc;
 }
 
-.g-rooms {
-	flex: 2;
-	padding: 10px;
-	overflow-y: auto;
-}
 
 
 
@@ -350,18 +345,162 @@ body {
 	border-bottom: 1px solid #ccc;
 }
 
+
+.g-rooms {
+    flex: 2; /* 가용 공간의 2/3을 차지하도록 설정 */
+    padding: 10px;
+    display: flex;
+    flex-direction: column; /* 세로로 정렬 */
+    overflow: hidden; /* 기본적으로 스크롤바 숨김 */
+    border-right: 1px solid #ccc; /* 오른쪽 테두리 */
+}
+
+.g-header {
+    margin: 0; /* 상단 여백 제거 */
+}
+
+.room-list-container {
+    flex-grow: 1; /* 남은 공간을 차지하도록 설정 */
+    overflow-y: auto; /* 내용이 넘칠 때 세로 스크롤바 표시 */
+    border: 1px solid #ccc; /* 테두리 추가 */
+    padding: 10px; /* 여백 추가 */
+    background-color: #f9f9f9; /* 배경색 */
+}
+
+/* 기본 ul 스타일 제거 */
+.room-list-ul {
+    list-style-type: none; /* 왼쪽 점 제거 */
+    padding: 0; /* 기본 여백 제거 */
+    margin: 0; /* 기본 마진 제거 */
+}
+
+/* 각 li 스타일링 */
+.room-list-ul li {
+    border-bottom: 1px solid #ccc; /* 항목 간 경계선 추가 */
+    padding: 9px; /* 안쪽 여백 */
+    display: flex; /* 플렉스 레이아웃 사용 */
+    align-items: center; /* 수직 정렬 */
+}
+
+/* 마지막 항목의 아래 경계선 제거 */
+.room-list-ul li:last-child {
+    border-bottom: none; /* 마지막 항목의 경계선 제거 */
+}
+
+/* room-info의 flex 컨테이너 스타일 */
+.room-info {
+    display: flex; /* 항목을 가로로 배치 */
+    width: 100%; /* 전체 너비 사용 */
+    justify-content: space-between; /* 각 항목 간에 공간을 고르게 배치 */
+}
+
+/* 각 항목 스타일 */
+.room-count,
+.room-title,
+.room-character,
+.room-nickname {
+    flex: 1; /* 모든 항목을 동일한 비율로 배치 */
+    padding: 0 10px; /* 좌우 여백 추가 */
+}
+
+/* 항목에 마우스를 올렸을 때 배경색 변경 */
+.room-list-ul li:hover {
+    background-color: #f0f0f0; /* 마우스 오버 시 배경색 변경 */
+}
+
+/* *************상단바  */
+
+ /* 검색창 스타일 */
+ 
+ 		.top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+ 
+        #roomSearch {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #d6b45b;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        /* 방 만들기 버튼 스타일 */
+        #topButtons {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #d6b45b;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 5px;
+        }
+
+        /* 버튼 hover 효과 */
+        #topButtons:hover {
+            background-color: #6f4f28;
+        }
+
+
+        
+        
+        
+        
+.room-info-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px; /* 상하 4px, 좌우 10px 패딩 설정 */
+    width: 630px;
+    box-sizing: border-box;
+    margin-left: 10px;
+}
+
+.header-room-count,
+.header-room-title,
+.header-room-character,
+.header-room-nickname {
+	flex: 1;
+    color: #5D3A1F; /* 진갈색 글자 색상 설정 */
+    padding: 0 10px;
+
+}
+    
+        
 </style>
 </head>
 <body>
 	<div id="wrap">
 			<div class="g-rooms-container">
 				<div class="g-rooms">
-					<h2 class="g-header">방 목록</h2>
-					<ul>
-						<li>방 1</li>
-						<li>방 2</li>
-						<li>방 3</li>
+					<div class="top-bar">
+			            <input type="text" id="roomSearch" placeholder="방 검색" />
+			            <button id="topButtons">방 만들기</button>
+			            <button id="topButtons">새로고침</button>
+			            <button id="topButtons">내 정보</button>
+			        </div>
+			         <div class="room-info-header">
+		                <span class="header-room-count">인원수</span>
+		                <span class="header-room-title">방 제목</span>
+		                <span class="header-room-character">아바타</span>
+		                <span class="header-room-nickname">닉네임</span>
+		            </div>
+					<div class="room-list-container">
+					<ul class="room-list-ul">
+				            <c:forEach items="${r_data}" var="room">
+				                <li>
+				                    <div class="room-info" onclick="goToRoomDetail(${room.room_id})">
+				                        <span class="room-count">${room.user_count}/2</span>
+				                        <span class="room-title">${room.room_title}</span>
+				                        <span class="room-character">${room.avatar}</span>
+				                        <span class="room-nickname">${room.user_nickname}</span>
+				                    </div>
+				                </li>
+				            </c:forEach>
 					</ul>
+					</div>
 				</div>
 				<div class="chat-main">
 					<div class="window">
@@ -398,5 +537,11 @@ body {
 				</ul>
 			</div>
 	</div>
+	
+	<script>
+    function goToRoomDetail(roomId) {
+        window.location.href = `roomDetail?id=${roomId}`;
+    }
+    </script>
 </body>
 </html>
