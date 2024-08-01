@@ -15,4 +15,17 @@
 		SELECT password FROM users WHERE id = #{id}
 	</select>
 
+    
+    <select id="selectAllRooms" resultType="com.omok.project.domain.roomDTO">
+        SELECT
+            r.room_id,
+            r.room_title,
+            COUNT(rp.user_id) AS user_count,
+            MAX(u.avatar) AS avatar,  <!-- 방의 대표 아바타 -->
+            MAX(u.nickname) AS user_nickname  <!-- 방의 대표 유저 닉네임 -->
+        FROM room r
+        LEFT JOIN room_part rp ON r.room_id = rp.room_id
+        LEFT JOIN users u ON rp.user_id = u.id
+        GROUP BY r.room_id, r.room_title
+    </select>
 </mapper>

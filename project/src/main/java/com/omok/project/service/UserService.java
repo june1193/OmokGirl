@@ -1,8 +1,11 @@
 package com.omok.project.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.omok.project.domain.roomDTO;
 import com.omok.project.domain.userDTO;
 import com.omok.project.repository.userRepository;
 
@@ -12,6 +15,8 @@ public class UserService {
 	@Autowired
 	private userRepository r;
 
+	
+	
 	public void registerUser(userDTO u) {
 		r.insertUser(u);
 	}
@@ -21,4 +26,9 @@ public class UserService {
 		String storedPassword = r.findPasswordById(id);
 		return storedPassword != null && storedPassword.equals(password);//비번 틀리면 false 맞으면 tru
 	}
+	
+    // 모든 방 정보 조회
+    public List<roomDTO> selectAll() {
+        return r.selectAll();
+    }
 }
