@@ -392,6 +392,7 @@ body {
     display: flex; /* 항목을 가로로 배치 */
     width: 100%; /* 전체 너비 사용 */
     justify-content: space-between; /* 각 항목 간에 공간을 고르게 배치 */
+    font-size: 14px;
 }
 
 /* 각 항목 스타일 */
@@ -399,9 +400,31 @@ body {
 .room-title,
 .room-character,
 .room-nickname {
-    flex: 1; /* 모든 항목을 동일한 비율로 배치 */
     padding: 0 10px; /* 좌우 여백 추가 */
 }
+
+.room-count{
+    flex: 0.7; 
+}
+
+.room-title{
+	flex: 3;
+	white-space: nowrap; /* 텍스트를 한 줄로 표시 */
+    overflow: hidden; /* 넘치는 텍스트를 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트를 '...'으로 표시 */
+}
+
+.room-character{
+	flex: 1;
+}
+
+.room-nickname{
+	flex: 1;
+}
+
+
+
+
 
 /* 항목에 마우스를 올렸을 때 배경색 변경 */
 .room-list-ul li:hover {
@@ -453,9 +476,10 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 4px 10px; /* 상하 4px, 좌우 10px 패딩 설정 */
-    width: 630px;
+    width: 645px;
     box-sizing: border-box;
     margin-left: 10px;
+    font-size: 14px;
 }
 
 .header-room-count,
@@ -466,6 +490,22 @@ body {
     color: #5D3A1F; /* 진갈색 글자 색상 설정 */
     padding: 0 10px;
 
+}
+
+.header-room-count {
+    flex: 0.7; 
+}
+
+.header-room-title {
+    flex: 3; 
+}
+
+.header-room-character {
+    flex: 1; 
+}
+
+.header-room-nickname {
+    flex: 1; 
 }
     
         

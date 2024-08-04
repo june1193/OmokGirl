@@ -6,9 +6,9 @@
 <mapper namespace="com.omok.mapper">
 
 	<insert id="insertUser" parameterType="com.omok.project.domain.userDTO">
-		INSERT INTO users (id, password, email, nickname)
-		VALUES
-		(#{id}, #{password}, #{email}, #{nickname});
+		INSERT INTO users (id, password, email, nickname, avatar, wins)
+	    VALUES
+	    (#{id}, #{password}, #{email}, #{nickname}, #{avatar}, #{wins});
 	</insert>
 
 	<select id="getPasswordById" resultType="String">
