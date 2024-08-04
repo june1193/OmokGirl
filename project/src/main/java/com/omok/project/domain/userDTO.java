@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class userDTO {
-	private Integer userNum; // AUTO_INCREMENT 필드
-	private String id;
-	private String password;
-	private String email;
-	private String nickname;
+	private int userNum;
+    private String id;
+    private String password;
+    private String email;
+    private String nickname;
+    private String avatar = "나코"; // 기본값 설정
+    private int wins = 0; // 기본값 설정
 }
